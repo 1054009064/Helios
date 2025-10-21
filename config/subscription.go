@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -9,7 +11,6 @@ import (
 	"helios/models"
 
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/bytedance/sonic"
 )
 
 var GlobalConfig models.Config
@@ -35,17 +36,50 @@ func FetchSubscription(url string) error {
 		return fmt.Errorf("failed to decode base58 data")
 	}
 
-	var config models.Config
-	if err := sonic.UnmarshalString(string(decodedData), &config); err != nil {
+	// 先用 encoding/json 解析以保持键的顺序
+	var rawConfig struct {
+		APISites json.RawMessage  `json:"api_site"`
+	}
+	
+	if err := json.Unmarshal(decodedData, &rawConfig); err != nil {
 		return fmt.Errorf("failed to unmarshal config JSON: %v", err)
 	}
+	
+	// 构建最终的 config
+	var config models.Config
+	config.APISites = make(map[string]models.APISite)
+	config.SiteList = make([]models.APISite, 0)
+	
+	// 使用 json.Decoder 按顺序解析 api_site 对象
+	dec := json.NewDecoder(bytes.NewReader(rawConfig.APISites))
+	
+	// 读取开始的 {
+	if _, err := dec.Token(); err != nil {
+		return fmt.Errorf("failed to parse api_site: %v", err)
+	}
+	
+	// 按顺序读取每个键值对
+	for dec.More() {
+		// 读取键
+		token, err := dec.Token()
+		if err != nil {
+			return fmt.Errorf("failed to read key: %v", err)
+		}
+		key := token.(string)
+		
+		// 读取值
+		var site models.APISite
+		if err := dec.Decode(&site); err != nil {
+			return fmt.Errorf("failed to decode site: %v", err)
+		}
+		
+		site.Key = key
+		config.APISites[key] = site
+		config.SiteList = append(config.SiteList, site)
+	}
+	
 	if len(config.APISites) == 0 {
 		return fmt.Errorf("no API sites found in subscription")
-	}
-	config.SiteList = config.APISites
-	for k, v := range config.APISites {
-		v.Key = k
-		config.APISites[k] = v
 	}
 
 	GlobalConfig = config
