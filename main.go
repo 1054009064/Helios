@@ -49,6 +49,7 @@ func main() {
 	// 其他接口都需要认证中间件
 	http.HandleFunc("/api/search", handlers.AuthMiddleware(handlers.SearchHandler))
 	http.HandleFunc("/api/search/ws", handlers.AuthMiddleware(handlers.SSESearchHandler))
+	http.HandleFunc("/api/search/resources", handlers.AuthMiddleware(handlers.ResourcesHandler))
 	http.HandleFunc("/api/detail", handlers.AuthMiddleware(handlers.DetailHandler))
 	http.HandleFunc("/api/favorites", handlers.AuthMiddleware(handlers.FavoritesHandler))
 	http.HandleFunc("/api/searchhistory", handlers.AuthMiddleware(handlers.SearchHistoryHandler))
