@@ -42,6 +42,7 @@ func FetchSubscription(url string) error {
 	if len(config.APISites) == 0 {
 		return fmt.Errorf("no API sites found in subscription")
 	}
+	config.SiteList = config.APISites
 	for k, v := range config.APISites {
 		v.Key = k
 		config.APISites[k] = v

@@ -2,6 +2,7 @@ package models
 
 type Config struct {
 	APISites map[string]APISite `json:"api_site"`
+	SiteList []APISite          `json:"site_list"`
 }
 
 type APISite struct {
