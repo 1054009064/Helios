@@ -50,10 +50,12 @@ func main() {
 	http.HandleFunc("/api/search", handlers.AuthMiddleware(handlers.SearchHandler))
 	http.HandleFunc("/api/search/ws", handlers.AuthMiddleware(handlers.SSESearchHandler))
 	http.HandleFunc("/api/search/resources", handlers.AuthMiddleware(handlers.ResourcesHandler))
+	http.HandleFunc("/api/search/suggestions", handlers.AuthMiddleware(handlers.SuggestionsHandler))
 	http.HandleFunc("/api/detail", handlers.AuthMiddleware(handlers.DetailHandler))
 	http.HandleFunc("/api/favorites", handlers.AuthMiddleware(handlers.FavoritesHandler))
 	http.HandleFunc("/api/searchhistory", handlers.AuthMiddleware(handlers.SearchHistoryHandler))
 	http.HandleFunc("/api/playrecords", handlers.AuthMiddleware(handlers.PlayRecordsHandler))
+	http.HandleFunc("/api/live/sources", handlers.AuthMiddleware(handlers.LiveSourcesHandler))
 
 	port := ":8080"
 	fmt.Printf("Server starting on port %s\n", port)
